@@ -1,5 +1,12 @@
 import React from "react";
+import Hero from "../Hero";
+import Collection from "../Collection";
 
 export default function Home() {
-  return <h1>HELLO WORLD</h1>;
+  return (
+    <>
+      <Hero />
+      <Collection />
+    </>
+  );
 }
