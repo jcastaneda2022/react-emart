@@ -6,7 +6,11 @@ import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 import { Form } from "react-bootstrap";
 import { useCollection } from "react-firebase-hooks/firestore";
-import { db } from "../../../firebase";
+import { auth, db, facebookProvider, googleProvider } from "../../../firebase";
+import { bindActionCreators } from "redux";
+import { useDispatch } from "react-redux";
+import * as actionUser from "../../../redux/actions/actionUser";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Login() {
   const [darkMode, setDarkMode] = useState("");
@@ -17,6 +21,8 @@ export default function Login() {
   const [invalidUser, setInvalidUser] = useState(false);
 
   const [userList] = useCollection(db.collection("users"));
+  const [user] = useAuthState(auth);
+  const { loginUser } = bindActionCreators(actionUser, useDispatch());
 
   const checkIfValid = () => {
     let isValid = false;
@@ -41,11 +47,21 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (checkIfValid()) {
-      console.log("VALID LOGIN");
-    } else {
-      console.log("INVALID LOGIN");
+      loginUser({ email });
     }
   };
+
+  const facebookSignIn = (e) => {
+    e.preventDefault();
+    auth.signInWithPopup(facebookProvider).catch((e) => alert(e.message));
+  };
+
+  const googleSignIn = (e) => {
+    e.preventDefault();
+    auth.signInWithPopup(googleProvider).catch((error) => alert(error.message));
+  };
+
+  console.log(user);
 
   return (
     <div className="auth">
@@ -64,11 +80,17 @@ export default function Login() {
                 </span>
               </div>
               <h5 className="text-center fst-italic">Shopping-Style-Fashion</h5>
-              <button className={`btn mt-5 mb-3 service-btn${darkMode}`}>
+              <button
+                className={`btn mt-5 mb-3 service-btn${darkMode}`}
+                onClick={facebookSignIn}
+              >
                 <FontAwesomeIcon icon={faFacebook} />
                 <span> Login with Facebook</span>
               </button>
-              <button className={`btn mb-3 service-btn${darkMode}`}>
+              <button
+                className={`btn mb-3 service-btn${darkMode}`}
+                onClick={googleSignIn}
+              >
                 <FontAwesomeIcon icon={faGoogle} />
                 <span> Login with Google</span>
               </button>
