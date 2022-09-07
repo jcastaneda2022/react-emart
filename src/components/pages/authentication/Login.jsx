@@ -5,6 +5,8 @@ import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
 import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 import { Form } from "react-bootstrap";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { db } from "../../../firebase";
 
 export default function Login() {
   const [darkMode, setDarkMode] = useState("");
@@ -14,9 +16,35 @@ export default function Login() {
   // Validation
   const [invalidUser, setInvalidUser] = useState(false);
 
+  const [userList] = useCollection(db.collection("users"));
+
+  const checkIfValid = () => {
+    let isValid = false;
+    // Check if there's no user created
+    if (userList.docs.length === 0) {
+      setInvalidUser(true);
+      return false;
+    }
+    // Check if user exist
+    userList.docs.forEach((user) => {
+      if (user.data().email === email && user.data().password === password) {
+        setInvalidUser(false);
+        isValid = true;
+      } else {
+        setInvalidUser(true);
+      }
+    });
+    //return statement
+    return isValid;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("SUBMIT!!");
+    if (checkIfValid()) {
+      console.log("VALID LOGIN");
+    } else {
+      console.log("INVALID LOGIN");
+    }
   };
 
   return (
